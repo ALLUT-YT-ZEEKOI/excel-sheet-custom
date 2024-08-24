@@ -142,7 +142,12 @@
 
         function drag(event) {
             draggedRow = event.target.closest('tr');
-            event.dataTransfer.setData('text/plain', '');
+            if (draggedRow.classList.contains('main-data-row')) {
+                event.dataTransfer.setData('text/plain', '');
+                draggedRow.classList.add('dragging');
+            } else {
+                draggedRow = null;
+            }
         }
 
         function allowDrop(event) {
@@ -151,9 +156,13 @@
 
         function drop(event) {
             event.preventDefault();
-            const targetRow = event.target.closest('tr');
-            if (targetRow && targetRow !== draggedRow && targetRow.parentNode === draggedRow.parentNode) {
-                targetRow.parentNode.insertBefore(draggedRow, targetRow.nextSibling);
+            if (draggedRow && draggedRow.classList.contains('main-data-row')) {
+                const targetRow = event.target.closest('tr');
+                if (targetRow && targetRow !== draggedRow && targetRow.parentNode === draggedRow.parentNode) {
+                    targetRow.parentNode.insertBefore(draggedRow, targetRow.nextSibling);
+                }
+                draggedRow.classList.remove('dragging');
+                draggedRow = null;
             }
         }
 
@@ -162,9 +171,7 @@
 
             cell.classList.add('processed');
             const currentRow = cell.parentElement;
-            const tableBody = document.querySelector('#myTable tbody');
 
-            // Create two normal rows
             const normalRows = [];
             for (let rowIndex = 1; rowIndex <= 2; rowIndex++) {
                 const normalRow = document.createElement('tr');
@@ -180,14 +187,12 @@
                 normalRows.push(normalRow);
             }
 
-            // Insert the normal rows after the current row
             currentRow.insertAdjacentElement('afterend', normalRows[1]);
             currentRow.insertAdjacentElement('afterend', normalRows[0]);
 
-            // Add "Add New Row" button after the second normal row
             const addRowButtonRow = document.createElement('tr');
             const addRowButtonCell = document.createElement('td');
-            addRowButtonCell.colSpan = 8; // Span the button across all columns
+            addRowButtonCell.colSpan = 8;
 
             const addRowButton = document.createElement('button');
             addRowButton.textContent = 'Add New Row';
@@ -212,11 +217,10 @@
         }
 
         function createSubRows(cell, level) {
-            if (level >= maxLevel) return; // Stop creating sub-rows if the maximum level is reached
+            if (level >= maxLevel) return;
 
             const currentRow = cell.parentElement;
 
-            // Ensure only one sub-row is created
             if (cell.classList.contains('sub-row-created')) return;
 
             cell.classList.add('sub-row-created');
@@ -235,22 +239,19 @@
 
             currentRow.insertAdjacentElement('afterend', newRow);
 
-            // Add "Add New Row" button after sub-row
             addOrReplaceButton(newRow, level);
         }
 
         function addOrReplaceButton(afterRow, level) {
             const existingButtonRow = afterRow.nextElementSibling;
 
-            // Remove existing button row if it exists
             if (existingButtonRow && existingButtonRow.querySelector('button')) {
                 existingButtonRow.remove();
             }
 
-            // Add "Add New Row" button
             const addRowButtonRow = document.createElement('tr');
             const addRowButtonCell = document.createElement('td');
-            addRowButtonCell.colSpan = 8; // Span the button across all columns
+            addRowButtonCell.colSpan = 8;
 
             const addRowButton = document.createElement('button');
             addRowButton.textContent = 'Add New Row';
@@ -299,7 +300,6 @@
             tableBody.appendChild(mainRow);
         }
 
-        // Resizable Columns
         document.querySelectorAll('th').forEach((th) => {
             const resizer = th.querySelector('.resizer');
             resizer.addEventListener('mousedown', initResize);

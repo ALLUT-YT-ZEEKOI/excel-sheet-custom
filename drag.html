@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .normal-row td:first-child,
+        .sub-row td:first-child {
+            padding-left: 30px;
+        }
+
+        .sub-row.level-1 td:first-child {
+            padding-left: 60px;
+        }
+
+        .sub-row.level-2 td:first-child {
+            padding-left: 90px;
+        }
+
+        .sub-row.level-3 td:first-child {
+            padding-left: 120px;
+        }
+
+        .main-data-row {
+            background-color: #f9f9f9;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <table id="myTable">
+        <thead>
+            <tr>
+                <th>Column 1</th>
+                <th>Column 2</th>
+                <th>Column 3</th>
+                <th>Column 4</th>
+                <th>Column 5</th>
+                <th>Column 6</th>
+                <th>Column 7</th>
+                <th>Column 8</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="main-data-row">
+                <td onclick="toggleRows(this)">Data 1.1</td>
+                <td>Data 1.2</td>
+                <td>Data 1.3</td>
+                <td>Data 1.4</td>
+                <td>Data 1.5</td>
+                <td>Data 1.6</td>
+                <td>Data 1.7</td>
+                <td>Data 1.8</td>
+            </tr>
+            <tr class="main-data-row">
+                <td onclick="toggleRows(this)">Data 2.1</td>
+                <td>Data 2.2</td>
+                <td>Data 2.3</td>
+                <td>Data 2.4</td>
+                <td>Data 2.5</td>
+                <td>Data 2.6</td>
+                <td>Data 2.7</td>
+                <td>Data 2.8</td>
+            </tr>
+        </tbody>
+    </table>
+    <button onclick="createMainDataRow()">Add New Main Data Row</button>
+    <script>
+        const maxLevel = 3;
+
+        function toggleRows(cell) {
+            const currentRow = cell.parentElement;
+            const nextRows = [];
+
+            // Collect rows to toggle
+            let nextSibling = currentRow.nextElementSibling;
+            while (nextSibling && !nextSibling.classList.contains('main-data-row')) {
+                nextRows.push(nextSibling);
+                nextSibling = nextSibling.nextElementSibling;
+            }
+
+            // Toggle visibility
+            if (nextRows.length > 0) {
+                if (nextRows[0].classList.contains('hidden')) {
+                    nextRows.forEach(row => row.classList.remove('hidden'));
+                } else {
+                    nextRows.forEach(row => row.classList.add('hidden'));
+                }
+            } else {
+                if (cell.classList.contains('processed')) return;
+
+                cell.classList.add('processed');
+                const tableBody = document.querySelector('#myTable tbody');
+
+                const normalRows = [];
+                for (let rowIndex = 1; rowIndex <= 2; rowIndex++) {
+                    const normalRow = document.createElement('tr');
+                    normalRow.className = 'normal-row';
+                    for (let i = 0; i < 8; i++) {
+                        const newCell = document.createElement('td');
+                        newCell.textContent = `Normal Row ${rowIndex} - ${i + 1}`;
+                        if (i === 0) {
+                            newCell.onclick = () => toggleSubRows(newCell, 1);
+                        }
+                        normalRow.appendChild(newCell);
+                    }
+                    normalRows.push(normalRow);
+                }
+
+                currentRow.insertAdjacentElement('afterend', normalRows[1]);
+                currentRow.insertAdjacentElement('afterend', normalRows[0]);
+
+                const addRowButtonRow = document.createElement('tr');
+                const addRowButtonCell = document.createElement('td');
+                addRowButtonCell.colSpan = 8;
+
+                const addRowButton = document.createElement('button');
+                addRowButton.textContent = 'Add New Row';
+                addRowButton.onclick = () => createNormalRow3(normalRows[1]);
+
+                addRowButtonCell.appendChild(addRowButton);
+                addRowButtonRow.appendChild(addRowButtonCell);
+                normalRows[1].insertAdjacentElement('afterend', addRowButtonRow);
+            }
+        }
+
+        function createNormalRow3(afterRow) {
+            const normalRow3 = document.createElement('tr');
+            normalRow3.className = 'normal-row';
+
+            for (let i = 0; i < 8; i++) {
+                const newCell = document.createElement('td');
+                newCell.textContent = `Normal Row 3 - ${i + 1}`;
+                normalRow3.appendChild(newCell);
+            }
+
+            afterRow.insertAdjacentElement('afterend', normalRow3);
+        }
+
+        function toggleSubRows(cell, level) {
+            const currentRow = cell.parentElement;
+            const nextRows = [];
+
+            let nextSibling = currentRow.nextElementSibling;
+            while (nextSibling && nextSibling.classList.contains('sub-row')) {
+                nextRows.push(nextSibling);
+                nextSibling = nextSibling.nextElementSibling;
+            }
+
+            if (nextRows.length > 0) {
+                if (nextRows[0].classList.contains('hidden')) {
+                    nextRows.forEach(row => row.classList.remove('hidden'));
+                } else {
+                    nextRows.forEach(row => row.classList.add('hidden'));
+                }
+            } else {
+                if (cell.classList.contains('sub-row-processed')) return;
+
+                cell.classList.add('sub-row-processed');
+                createSubRows(cell, level);
+            }
+        }
+
+        function createSubRows(cell, level) {
+            if (level >= maxLevel) return;
+
+            const currentRow = cell.parentElement;
+
+            const newRow = document.createElement('tr');
+            newRow.className = `sub-row level-${level}`;
+
+            for (let i = 0; i < 8; i++) {
+                const newCell = document.createElement('td');
+                newCell.textContent = `Sub-row ${level}.${i + 1}`;
+                if (i === 0) {
+                    newCell.onclick = () => toggleSubRows(newCell, level + 1);
+                }
+                newRow.appendChild(newCell);
+            }
+
+            currentRow.insertAdjacentElement('afterend', newRow);
+            addOrReplaceButton(newRow, level);
+        }
+
+        function addOrReplaceButton(afterRow, level) {
+            const existingButtonRow = afterRow.nextElementSibling;
+
+            if (existingButtonRow && existingButtonRow.querySelector('button')) {
+                existingButtonRow.remove();
+            }
+
+            const addRowButtonRow = document.createElement('tr');
+            const addRowButtonCell = document.createElement('td');
+            addRowButtonCell.colSpan = 8;
+
+            const addRowButton = document.createElement('button');
+            addRowButton.textContent = 'Add New Row';
+            addRowButton.onclick = () => createSubRowsButtonClick(afterRow, level);
+
+            addRowButtonCell.appendChild(addRowButton);
+            addRowButtonRow.appendChild(addRowButtonCell);
+            afterRow.insertAdjacentElement('afterend', addRowButtonRow);
+        }
+
+        function createSubRowsButtonClick(row, level) {
+            createSubRows(row.querySelector('td:first-child'), level);
+        }
+
+        function createMainDataRow() {
+            const tableBody = document.querySelector('#myTable tbody');
+            const newMainDataRow = document.createElement('tr');
+            newMainDataRow.className = 'main-data-row';
+
+            for (let i = 0; i < 8; i++) {
+                const newCell = document.createElement('td');
+                newCell.textContent = `New Data ${i + 1}`;
+                if (i === 0) {
+                    newCell.onclick = () => toggleRows(newCell);
+                }
+                newMainDataRow.appendChild(newCell);
+            }
+
+            tableBody.appendChild(newMainDataRow);
+            addOrReplaceMainDataButton();
+        }
+
+        function addOrReplaceMainDataButton() {
+            const tableBody = document.querySelector('#myTable tbody');
+            const existingButtonRow = tableBody.querySelector('.add-main-data-row');
+
+            if (existingButtonRow) {
+                existingButtonRow.remove();
+            }
+
+            const addRowButtonRow = document.createElement('tr');
+            addRowButtonRow.className = 'add-main-data-row';
+            const addRowButtonCell = document.createElement('td');
+            addRowButtonCell.colSpan = 8;
+
+            const addRowButton = document.createElement('button');
+            addRowButton.textContent = 'Add New Main Data Row';
+            addRowButton.onclick = createMainDataRow;
+
+            addRowButtonCell.appendChild(addRowButton);
+            addRowButtonRow.appendChild(addRowButtonCell);
+            tableBody.appendChild(addRowButtonRow);
+        }
+
+        addOrReplaceMainDataButton();
+    </script>
+</body>
+
+</html>
