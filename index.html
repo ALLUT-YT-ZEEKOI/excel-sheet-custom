@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Table</title>
+    <title>Dynamic Table with Drag, Drop, and Resizable Columns</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,6 +13,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            position: relative;
         }
 
         th,
@@ -20,6 +21,7 @@
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
+            position: relative;
         }
 
         th {
@@ -69,6 +71,20 @@
         .main-data-row {
             background-color: #f9f9f9;
         }
+
+        .dragging {
+            background-color: #f1f1f1;
+        }
+
+        .resizer {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 5px;
+            height: 100%;
+            cursor: col-resize;
+            user-select: none;
+        }
     </style>
 </head>
 
@@ -76,18 +92,27 @@
     <table id="myTable">
         <thead>
             <tr>
-                <th>Column 1</th>
-                <th>Column 2</th>
-                <th>Column 3</th>
-                <th>Column 4</th>
-                <th>Column 5</th>
-                <th>Column 6</th>
-                <th>Column 7</th>
-                <th>Column 8</th>
+                <th>Column 1<div class="resizer"></div>
+                </th>
+                <th>Column 2<div class="resizer"></div>
+                </th>
+                <th>Column 3<div class="resizer"></div>
+                </th>
+                <th>Column 4<div class="resizer"></div>
+                </th>
+                <th>Column 5<div class="resizer"></div>
+                </th>
+                <th>Column 6<div class="resizer"></div>
+                </th>
+                <th>Column 7<div class="resizer"></div>
+                </th>
+                <th>Column 8<div class="resizer"></div>
+                </th>
             </tr>
         </thead>
         <tbody>
-            <tr class="main-data-row">
+            <tr class="main-data-row" draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)"
+                ondrop="drop(event)">
                 <td onclick="createNormalRows(this)">Data 1.1</td>
                 <td>Data 1.2</td>
                 <td>Data 1.3</td>
@@ -97,7 +122,8 @@
                 <td>Data 1.7</td>
                 <td>Data 1.8</td>
             </tr>
-            <tr class="main-data-row">
+            <tr class="main-data-row" draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)"
+                ondrop="drop(event)">
                 <td onclick="createNormalRows(this)">Data 2.1</td>
                 <td>Data 2.2</td>
                 <td>Data 2.3</td>
@@ -112,6 +138,24 @@
     <button onclick="createMainDataRow()">Add New Main Data Row</button>
     <script>
         const maxLevel = 3;
+        let draggedRow = null;
+
+        function drag(event) {
+            draggedRow = event.target.closest('tr');
+            event.dataTransfer.setData('text/plain', '');
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const targetRow = event.target.closest('tr');
+            if (targetRow && targetRow !== draggedRow && targetRow.parentNode === draggedRow.parentNode) {
+                targetRow.parentNode.insertBefore(draggedRow, targetRow.nextSibling);
+            }
+        }
 
         function createNormalRows(cell) {
             if (cell.classList.contains('processed')) return;
@@ -224,34 +268,59 @@
             for (let i = 0; i < 8; i++) {
                 const newCell = document.createElement('td');
                 newCell.textContent = `Sub-row ${level}.${i + 1}`;
+                if (i === 0) {
+                    newCell.onclick = () => createSubRows(newCell, level + 1);
+                }
                 newRow.appendChild(newCell);
             }
 
             afterRow.insertAdjacentElement('afterend', newRow);
-
-            // Add button for the new sub-row
             addOrReplaceButton(newRow, level);
         }
 
         function createMainDataRow() {
             const tableBody = document.querySelector('#myTable tbody');
-
-            // Create a new main data row
-            const newMainDataRow = document.createElement('tr');
-            newMainDataRow.className = 'main-data-row';
+            const mainRow = document.createElement('tr');
+            mainRow.className = 'main-data-row';
+            mainRow.draggable = true;
+            mainRow.ondragstart = drag;
+            mainRow.ondragover = allowDrop;
+            mainRow.ondrop = drop;
 
             for (let i = 0; i < 8; i++) {
                 const newCell = document.createElement('td');
-                newCell.textContent = `New Data ${i + 1}`;
+                newCell.textContent = `Main Data Row ${tableBody.rows.length + 1} - ${i + 1}`;
                 if (i === 0) {
                     newCell.onclick = () => createNormalRows(newCell);
                 }
-                newMainDataRow.appendChild(newCell);
+                mainRow.appendChild(newCell);
             }
 
-            // Insert the new main data row after the last row in the table body
-            tableBody.appendChild(newMainDataRow);
+            tableBody.appendChild(mainRow);
         }
+
+        // Resizable Columns
+        document.querySelectorAll('th').forEach((th) => {
+            const resizer = th.querySelector('.resizer');
+            resizer.addEventListener('mousedown', initResize);
+
+            function initResize(e) {
+                window.addEventListener('mousemove', resizeColumn);
+                window.addEventListener('mouseup', stopResize);
+
+                let startX = e.clientX;
+                let startWidth = th.offsetWidth;
+
+                function resizeColumn(e) {
+                    th.style.width = `${startWidth + (e.clientX - startX)}px`;
+                }
+
+                function stopResize() {
+                    window.removeEventListener('mousemove', resizeColumn);
+                    window.removeEventListener('mouseup', stopResize);
+                }
+            }
+        });
     </script>
 </body>
 
