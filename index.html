@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Styling for padding in first column */
+        .normal-row td:first-child,
+        .sub-row td:first-child {
+            padding-left: 30px;
+            /* Base padding for first column of all rows */
+        }
+
+        .sub-row.level-1 td:first-child {
+            padding-left: 60px;
+            /* Extra padding for level 1 sub-rows */
+        }
+
+        .sub-row.level-2 td:first-child {
+            padding-left: 90px;
+            /* Extra padding for level 2 sub-rows */
+        }
+
+        .sub-row.level-3 td:first-child {
+            padding-left: 120px;
+            /* Extra padding for level 3 sub-rows */
+        }
+    </style>
+</head>
+
+<body>
+    <table id="myTable">
+        <thead>
+            <tr>
+                <th>Column 1</th>
+                <th>Column 2</th>
+                <th>Column 3</th>
+                <th>Column 4</th>
+                <th>Column 5</th>
+                <th>Column 6</th>
+                <th>Column 7</th>
+                <th>Column 8</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td onclick="createNormalRows(this)">Data 1.1</td>
+                <td>Data 1.2</td>
+                <td>Data 1.3</td>
+                <td>Data 1.4</td>
+                <td>Data 1.5</td>
+                <td>Data 1.6</td>
+                <td>Data 1.7</td>
+                <td>Data 1.8</td>
+            </tr>
+            <tr>
+                <td onclick="createNormalRows(this)">Data 2.1</td>
+                <td>Data 2.2</td>
+                <td>Data 2.3</td>
+                <td>Data 2.4</td>
+                <td>Data 2.5</td>
+                <td>Data 2.6</td>
+                <td>Data 2.7</td>
+                <td>Data 2.8</td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        const maxLevel = 3;
+
+        function createNormalRows(cell) {
+            if (cell.classList.contains('processed')) return;
+
+            cell.classList.add('processed');
+            const currentRow = cell.parentElement;
+            const tableBody = document.querySelector('#myTable tbody');
+
+            // Create two normal rows
+            const normalRows = [];
+            for (let rowIndex = 1; rowIndex <= 2; rowIndex++) {
+                const normalRow = document.createElement('tr');
+                normalRow.className = 'normal-row';
+                for (let i = 0; i < 8; i++) {
+                    const newCell = document.createElement('td');
+                    newCell.textContent = `Normal Row ${rowIndex} - ${i + 1}`;
+                    if (i === 0) {
+                        newCell.onclick = () => createSubRows(newCell, 1);
+                    }
+                    normalRow.appendChild(newCell);
+                }
+                normalRows.push(normalRow);
+            }
+
+            // Insert the normal rows after the current row
+            currentRow.insertAdjacentElement('afterend', normalRows[1]);
+            currentRow.insertAdjacentElement('afterend', normalRows[0]);
+
+            // Add "Add New Row" button after the second normal row
+            const addRowButtonRow = document.createElement('tr');
+            const addRowButtonCell = document.createElement('td');
+            addRowButtonCell.colSpan = 8; // Span the button across all columns
+
+            const addRowButton = document.createElement('button');
+            addRowButton.textContent = 'Add New Row';
+            addRowButton.onclick = () => createNormalRow3(normalRows[1]);
+
+            addRowButtonCell.appendChild(addRowButton);
+            addRowButtonRow.appendChild(addRowButtonCell);
+            normalRows[1].insertAdjacentElement('afterend', addRowButtonRow);
+        }
+
+        function createNormalRow3(afterRow) {
+            const normalRow3 = document.createElement('tr');
+            normalRow3.className = 'normal-row';
+
+            for (let i = 0; i < 8; i++) {
+                const newCell = document.createElement('td');
+                newCell.textContent = `Normal Row 3 - ${i + 1}`;
+                normalRow3.appendChild(newCell);
+            }
+
+            afterRow.insertAdjacentElement('afterend', normalRow3);
+        }
+
+        function createSubRows(cell, level) {
+            if (level >= maxLevel) return; // Stop creating sub-rows if the maximum level is reached
+
+            const currentRow = cell.parentElement;
+
+            // Ensure only one sub-row is created
+            if (cell.classList.contains('sub-row-created')) return;
+
+            cell.classList.add('sub-row-created');
+
+            const newRow = document.createElement('tr');
+            newRow.className = `sub-row level-${level}`;
+
+            for (let i = 0; i < 8; i++) {
+                const newCell = document.createElement('td');
+                newCell.textContent = `Sub-row ${level}.${i + 1}`;
+                if (i === 0) {
+                    newCell.onclick = () => createSubRows(newCell, level + 1);
+                }
+                newRow.appendChild(newCell);
+            }
+
+            currentRow.insertAdjacentElement('afterend', newRow);
+
+            // Add "Add New Row" button after sub-row
+            addOrReplaceButton(newRow, level);
+        }
+
+        function addOrReplaceButton(afterRow, level) {
+            const existingButtonRow = afterRow.nextElementSibling;
+
+            // Remove existing button row if it exists
+            if (existingButtonRow && existingButtonRow.querySelector('button')) {
+                existingButtonRow.remove();
+            }
+
+            // Add "Add New Row" button
+            const addRowButtonRow = document.createElement('tr');
+            const addRowButtonCell = document.createElement('td');
+            addRowButtonCell.colSpan = 8; // Span the button across all columns
+
+            const addRowButton = document.createElement('button');
+            addRowButton.textContent = 'Add New Row';
+            addRowButton.onclick = () => createSubRowsButtonClick(afterRow, level);
+
+            addRowButtonCell.appendChild(addRowButton);
+            addRowButtonRow.appendChild(addRowButtonCell);
+            afterRow.insertAdjacentElement('afterend', addRowButtonRow);
+        }
+
+        function createSubRowsButtonClick(afterRow, level) {
+            const newRow = document.createElement('tr');
+            newRow.className = `sub-row level-${level}`;
+
+            for (let i = 0; i < 8; i++) {
+                const newCell = document.createElement('td');
+                newCell.textContent = `Sub-row ${level}.${i + 1}`;
+                newRow.appendChild(newCell);
+            }
+
+            afterRow.insertAdjacentElement('afterend', newRow);
+
+            // Add button for the new sub-row
+            addOrReplaceButton(newRow, level);
+        }
+    </script>
+</body>
+
+</html>
