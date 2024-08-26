@@ -29,7 +29,7 @@
             /* Hide overflow text */
             text-overflow: ellipsis;
             /* Show ellipsis for overflow text */
-            width: 120px;
+            width: 200px;
             /* Fixed width */
             /* height: px; */
             /* Fixed height */
@@ -276,6 +276,8 @@
             row.addEventListener('dragover', allowDrop);
             row.addEventListener('drop', drop);
         });
+
+
         const maxLevel = 4;
 
         function toggleRows(cell) {
@@ -445,10 +447,6 @@
             // Insert the new row with the button after the specified row
             afterRow.insertAdjacentElement('afterend', addRowButtonRow);
         }
-
-
-
-
 
         function createSubRowsButtonClick(row, level) {
             createSubRows(row.querySelector('td:first-child'), level);
