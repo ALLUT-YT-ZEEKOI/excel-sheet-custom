@@ -1,6 +1,3 @@
-full code with dragable and extandable and toggle
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -328,7 +325,7 @@ full code with dragable and extandable and toggle
                 addRowButtonCell.colSpan = 8;
 
                 const addRowButton = document.createElement('button');
-                addRowButton.textContent = 'Add New Row';
+                addRowButton.textContent = 'Add New Normal Row';
                 addRowButton.onclick = () => createNormalRow3(normalRows[1]);
 
                 addRowButtonCell.appendChild(addRowButton);
@@ -396,18 +393,24 @@ full code with dragable and extandable and toggle
         }
 
         function addOrReplaceButton(afterRow, level) {
+            // Check if a button already exists at this level
             const existingButtonRow = afterRow.nextElementSibling;
+            const existingButton = existingButtonRow && existingButtonRow.querySelector(`button.level-${level}`);
 
-            if (existingButtonRow && existingButtonRow.querySelector('button')) {
-                existingButtonRow.remove();
+            // If the button already exists, do not add a duplicate
+            if (existingButton) {
+                return;
             }
 
+            // Create a new row for the button if it doesn't exist
             const addRowButtonRow = document.createElement('tr');
             const addRowButtonCell = document.createElement('td');
             addRowButtonCell.colSpan = 8;
 
+            // Determine the correct label for the button based on the level
+            const buttonLabel = `Add New Sub Row ${level}.1`;
             const addRowButton = document.createElement('button');
-            addRowButton.textContent = 'Add New Row';
+            addRowButton.textContent = buttonLabel;
             addRowButton.className = `add-row-button level-${level}`; // Add level class
             addRowButton.onclick = () => createSubRowsButtonClick(afterRow, level);
 
@@ -415,6 +418,37 @@ full code with dragable and extandable and toggle
             addRowButtonRow.appendChild(addRowButtonCell);
             afterRow.insertAdjacentElement('afterend', addRowButtonRow);
         }
+        function addOrReplaceButton(afterRow, level) {
+            // Check if the button already exists for this row level
+            const existingButton = afterRow.parentElement.querySelector(`.add-row-button.level-${level}`);
+
+            // If a button already exists, do not create a new one
+            if (existingButton) {
+                return;
+            }
+
+            // Create a new row for the button
+            const addRowButtonRow = document.createElement('tr');
+            const addRowButtonCell = document.createElement('td');
+            addRowButtonCell.colSpan = 8;
+
+            // Create the button with appropriate text for the level
+            const addRowButton = document.createElement('button');
+            addRowButton.textContent = `Add New Sub Row ${level}.1`;
+            addRowButton.className = `add-row-button level-${level}`; // Add level class
+            addRowButton.onclick = () => createSubRowsButtonClick(afterRow, level);
+
+            // Append the button to the cell and the cell to the row
+            addRowButtonCell.appendChild(addRowButton);
+            addRowButtonRow.appendChild(addRowButtonCell);
+
+            // Insert the new row with the button after the specified row
+            afterRow.insertAdjacentElement('afterend', addRowButtonRow);
+        }
+
+
+
+
 
         function createSubRowsButtonClick(row, level) {
             createSubRows(row.querySelector('td:first-child'), level);
@@ -429,3 +463,4 @@ full code with dragable and extandable and toggle
 </body>
 
 </html>
+<!-- .......................... -->
