@@ -76,6 +76,10 @@
             background-color: #f1f1f1;
         }
 
+        .hidden {
+            display: none;
+        }
+
         .resizer {
             position: absolute;
             right: 0;
@@ -113,7 +117,7 @@
         <tbody>
             <tr class="main-data-row" draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)"
                 ondrop="drop(event)">
-                <td onclick="createNormalRows(this)">Data 1.1</td>
+                <td onclick="toggleRows(this)">Data 1.1</td>
                 <td>Data 1.2</td>
                 <td>Data 1.3</td>
                 <td>Data 1.4</td>
@@ -124,7 +128,7 @@
             </tr>
             <tr class="main-data-row" draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)"
                 ondrop="drop(event)">
-                <td onclick="createNormalRows(this)">Data 2.1</td>
+                <td onclick="toggleRows(this)">Data 2.1</td>
                 <td>Data 2.2</td>
                 <td>Data 2.3</td>
                 <td>Data 2.4</td>
@@ -166,41 +170,60 @@
             }
         }
 
-        function createNormalRows(cell) {
-            if (cell.classList.contains('processed')) return;
-
-            cell.classList.add('processed');
+        function toggleRows(cell) {
             const currentRow = cell.parentElement;
+            const nextRows = [];
 
-            const normalRows = [];
-            for (let rowIndex = 1; rowIndex <= 2; rowIndex++) {
-                const normalRow = document.createElement('tr');
-                normalRow.className = 'normal-row';
-                for (let i = 0; i < 8; i++) {
-                    const newCell = document.createElement('td');
-                    newCell.textContent = `Normal Row ${rowIndex} - ${i + 1}`;
-                    if (i === 0) {
-                        newCell.onclick = () => createSubRows(newCell, 1);
-                    }
-                    normalRow.appendChild(newCell);
-                }
-                normalRows.push(normalRow);
+            // Collect rows to toggle
+            let nextSibling = currentRow.nextElementSibling;
+            while (nextSibling && !nextSibling.classList.contains('main-data-row')) {
+                nextRows.push(nextSibling);
+                nextSibling = nextSibling.nextElementSibling;
             }
 
-            currentRow.insertAdjacentElement('afterend', normalRows[1]);
-            currentRow.insertAdjacentElement('afterend', normalRows[0]);
+            // Toggle visibility
+            if (nextRows.length > 0) {
+                if (nextRows[0].classList.contains('hidden')) {
+                    nextRows.forEach(row => row.classList.remove('hidden'));
+                } else {
+                    nextRows.forEach(row => row.classList.add('hidden'));
+                }
+            } else {
+                if (cell.classList.contains('processed')) return;
 
-            const addRowButtonRow = document.createElement('tr');
-            const addRowButtonCell = document.createElement('td');
-            addRowButtonCell.colSpan = 8;
+                cell.classList.add('processed');
+                const tableBody = document.querySelector('#myTable tbody');
 
-            const addRowButton = document.createElement('button');
-            addRowButton.textContent = 'Add New Row';
-            addRowButton.onclick = () => createNormalRow3(normalRows[1]);
+                const normalRows = [];
+                for (let rowIndex = 1; rowIndex <= 2; rowIndex++) {
+                    const normalRow = document.createElement('tr');
+                    normalRow.className = 'normal-row';
+                    for (let i = 0; i < 8; i++) {
+                        const newCell = document.createElement('td');
+                        newCell.textContent = `Normal Row ${rowIndex} - ${i + 1}`;
+                        if (i === 0) {
+                            newCell.onclick = () => toggleSubRows(newCell, 1);
+                        }
+                        normalRow.appendChild(newCell);
+                    }
+                    normalRows.push(normalRow);
+                }
 
-            addRowButtonCell.appendChild(addRowButton);
-            addRowButtonRow.appendChild(addRowButtonCell);
-            normalRows[1].insertAdjacentElement('afterend', addRowButtonRow);
+                currentRow.insertAdjacentElement('afterend', normalRows[1]);
+                currentRow.insertAdjacentElement('afterend', normalRows[0]);
+
+                const addRowButtonRow = document.createElement('tr');
+                const addRowButtonCell = document.createElement('td');
+                addRowButtonCell.colSpan = 8;
+
+                const addRowButton = document.createElement('button');
+                addRowButton.textContent = 'Add New Row';
+                addRowButton.onclick = () => createNormalRow3(normalRows[1]);
+
+                addRowButtonCell.appendChild(addRowButton);
+                addRowButtonRow.appendChild(addRowButtonCell);
+                normalRows[1].insertAdjacentElement('afterend', addRowButtonRow);
+            }
         }
 
         function createNormalRow3(afterRow) {
@@ -216,111 +239,115 @@
             afterRow.insertAdjacentElement('afterend', normalRow3);
         }
 
-        function createSubRows(cell, level) {
-            if (level >= maxLevel) return;
-
+        function toggleSubRows(cell, level) {
             const currentRow = cell.parentElement;
+            const nextRows = [];
 
-            if (cell.classList.contains('sub-row-created')) return;
+            // Collect rows to toggle
+            let nextSibling = currentRow.nextElementSibling;
+            while (nextSibling && !nextSibling.classList.contains('main-data-row') && !nextSibling.classList.contains('normal-row')) {
+                nextRows.push(nextSibling);
+                nextSibling = nextSibling.nextElementSibling;
+            }
 
-            cell.classList.add('sub-row-created');
+            // Toggle visibility
+            if (nextRows.length > 0) {
+                if (nextRows[0].classList.contains('hidden')) {
+                    nextRows.forEach(row => row.classList.remove('hidden'));
+                } else {
+                    nextRows.forEach(row => row.classList.add('hidden'));
+                }
+            } else {
+                if (cell.classList.contains('sub-row-created')) return;
 
-            const newRow = document.createElement('tr');
-            newRow.className = `sub-row level-${level}`;
+                cell.classList.add('sub-row-created');
+
+                const newRow = document.createElement('tr');
+                newRow.className = `sub-row level-${level}`;
+
+                for (let i = 0; i < 8; i++) {
+                    const newCell = document.createElement('td');
+                    newCell.textContent = `Sub-row ${level}.${i + 1}`;
+                    if (i === 0) {
+                        if (level < maxLevel) {
+                            newCell.onclick = () => toggleSubRows(newCell, level + 1);
+                        }
+                    }
+                    newRow.appendChild(newCell);
+                }
+
+                currentRow.insertAdjacentElement('afterend', newRow);
+
+                const addSubRowButtonRow = document.createElement('tr');
+                const addSubRowButtonCell = document.createElement('td');
+                addSubRowButtonCell.colSpan = 8;
+
+                const addSubRowButton = document.createElement('button');
+                addSubRowButton.textContent = 'Add New Sub Row';
+                addSubRowButton.onclick = () => createSubRow(level + 1, newRow);
+
+                addSubRowButtonCell.appendChild(addSubRowButton);
+                addSubRowButtonRow.appendChild(addSubRowButtonCell);
+                newRow.insertAdjacentElement('afterend', addSubRowButtonRow);
+            }
+        }
+
+        function createSubRow(level, afterRow) {
+            const subRow = document.createElement('tr');
+            subRow.className = `sub-row level-${level}`;
 
             for (let i = 0; i < 8; i++) {
                 const newCell = document.createElement('td');
                 newCell.textContent = `Sub-row ${level}.${i + 1}`;
-                if (i === 0) {
-                    newCell.onclick = () => createSubRows(newCell, level + 1);
-                }
-                newRow.appendChild(newCell);
+                subRow.appendChild(newCell);
             }
 
-            currentRow.insertAdjacentElement('afterend', newRow);
-
-            addOrReplaceButton(newRow, level);
-        }
-
-        function addOrReplaceButton(afterRow, level) {
-            const existingButtonRow = afterRow.nextElementSibling;
-
-            if (existingButtonRow && existingButtonRow.querySelector('button')) {
-                existingButtonRow.remove();
-            }
-
-            const addRowButtonRow = document.createElement('tr');
-            const addRowButtonCell = document.createElement('td');
-            addRowButtonCell.colSpan = 8;
-
-            const addRowButton = document.createElement('button');
-            addRowButton.textContent = 'Add New Row';
-            addRowButton.onclick = () => createSubRowsButtonClick(afterRow, level);
-
-            addRowButtonCell.appendChild(addRowButton);
-            addRowButtonRow.appendChild(addRowButtonCell);
-            afterRow.insertAdjacentElement('afterend', addRowButtonRow);
-        }
-
-        function createSubRowsButtonClick(afterRow, level) {
-            const newRow = document.createElement('tr');
-            newRow.className = `sub-row level-${level}`;
-
-            for (let i = 0; i < 8; i++) {
-                const newCell = document.createElement('td');
-                newCell.textContent = `Sub-row ${level}.${i + 1}`;
-                if (i === 0) {
-                    newCell.onclick = () => createSubRows(newCell, level + 1);
-                }
-                newRow.appendChild(newCell);
-            }
-
-            afterRow.insertAdjacentElement('afterend', newRow);
-            addOrReplaceButton(newRow, level);
+            afterRow.insertAdjacentElement('afterend', subRow);
         }
 
         function createMainDataRow() {
             const tableBody = document.querySelector('#myTable tbody');
-            const mainRow = document.createElement('tr');
-            mainRow.className = 'main-data-row';
-            mainRow.draggable = true;
-            mainRow.ondragstart = drag;
-            mainRow.ondragover = allowDrop;
-            mainRow.ondrop = drop;
+            const newRow = document.createElement('tr');
+            newRow.className = 'main-data-row';
+            newRow.draggable = true;
+            newRow.ondragstart = drag;
+            newRow.ondragover = allowDrop;
+            newRow.ondrop = drop;
 
             for (let i = 0; i < 8; i++) {
                 const newCell = document.createElement('td');
-                newCell.textContent = `Main Data Row ${tableBody.rows.length + 1} - ${i + 1}`;
+                newCell.textContent = `New Data ${i + 1}`;
                 if (i === 0) {
-                    newCell.onclick = () => createNormalRows(newCell);
+                    newCell.onclick = () => toggleRows(newCell);
                 }
-                mainRow.appendChild(newCell);
+                newRow.appendChild(newCell);
             }
 
-            tableBody.appendChild(mainRow);
+            tableBody.appendChild(newRow);
         }
 
-        document.querySelectorAll('th').forEach((th) => {
-            const resizer = th.querySelector('.resizer');
+        document.querySelectorAll('.resizer').forEach(resizer => {
             resizer.addEventListener('mousedown', initResize);
-
-            function initResize(e) {
-                window.addEventListener('mousemove', resizeColumn);
-                window.addEventListener('mouseup', stopResize);
-
-                let startX = e.clientX;
-                let startWidth = th.offsetWidth;
-
-                function resizeColumn(e) {
-                    th.style.width = `${startWidth + (e.clientX - startX)}px`;
-                }
-
-                function stopResize() {
-                    window.removeEventListener('mousemove', resizeColumn);
-                    window.removeEventListener('mouseup', stopResize);
-                }
-            }
         });
+
+        function initResize(event) {
+            const th = event.target.parentElement;
+            const startX = event.pageX;
+            const startWidth = th.offsetWidth;
+
+            function onMouseMove(e) {
+                const newWidth = startWidth + (e.pageX - startX);
+                th.style.width = newWidth + 'px';
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
     </script>
 </body>
 
