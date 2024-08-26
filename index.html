@@ -101,6 +101,16 @@
             opacity: 0.5;
         }
 
+        .drop-indicator {
+            border: 2px solid #4CAF50;
+            border-style: dashed;
+            background-color: rgba(76, 175, 80, 0.1);
+            /* Light green background */
+            height: 0;
+            /* No height to keep it as a line */
+            position: relative;
+        }
+
         .drop-target {
             border: 2px dashed #4CAF50;
         }
@@ -206,9 +216,19 @@
     <script>
         let draggedRow = null;
         let draggedSection = [];
+        let dropIndicator = null;
 
         function allowDrop(event) {
             event.preventDefault();
+            const target = event.target.closest('tr');
+            if (target && target !== draggedRow) {
+                // Remove the existing drop indicator
+                resetDropIndicator();
+                // Create and insert a new drop indicator before the target row
+                dropIndicator = document.createElement('tr');
+                dropIndicator.className = 'drop-indicator';
+                target.parentElement.insertBefore(dropIndicator, target);
+            }
         }
 
         function drag(event) {
@@ -228,20 +248,28 @@
 
         function drop(event) {
             event.preventDefault();
-            if (event.target.tagName === 'TD') {
-                const targetRow = event.target.closest('tr');
+            if (dropIndicator) {
                 const tableBody = document.querySelector('#myTable tbody');
-                if (targetRow && draggedRow && targetRow !== draggedRow) {
-                    // Insert the dragged section after the target row
-                    let insertAfterRow = targetRow;
-                    draggedSection.forEach(row => {
-                        tableBody.insertBefore(row, insertAfterRow.nextElementSibling);
-                        insertAfterRow = row; // Update the row to insert after
-                    });
-                }
+                // Insert the dragged section before the drop indicator
+                let insertAfterRow = dropIndicator.previousElementSibling;
+                draggedSection.forEach(row => {
+                    tableBody.insertBefore(row, dropIndicator);
+                });
+                // Remove the drop indicator
+                dropIndicator.remove();
             }
+            resetDropIndicator();
             draggedRow.classList.remove('dragging');
         }
+
+        function resetDropIndicator() {
+            if (dropIndicator) {
+                dropIndicator.remove();
+                dropIndicator = null;
+            }
+        }
+
+        document.addEventListener('dragend', resetDropIndicator);
 
 
         function createMainDataRow() {
