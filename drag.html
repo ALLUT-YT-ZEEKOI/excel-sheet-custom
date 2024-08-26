@@ -28,13 +28,14 @@
         }
 
         button {
-            margin-top: 10px;
+            /* margin-top: 10px; */
             padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-left: 25px;
         }
 
         .resizer {
@@ -85,7 +86,29 @@
         .drop-target {
             border: 2px dashed #4CAF50;
         }
+
+        /* lslslsllslsl */
+        .add-row-button {
+            margin-left: 30px;
+            /* Default padding for normal rows */
+        }
+
+        .add-row-button.level-1 {
+            margin-left: 60px;
+            /* Padding for sub-row level 1 */
+        }
+
+        .add-row-button.level-2 {
+            margin-left: 90px;
+            /* Padding for sub-row level 2 */
+        }
+
+        .add-row-button.level-3 {
+            margin-left: 120px;
+            /* Padding for sub-row level 3 */
+        }
     </style>
+
 </head>
 
 <body>
@@ -133,9 +156,31 @@
                 <td>Data 2.7</td>
                 <td>Data 2.8</td>
             </tr>
+            <tr class="main-data-row" draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)"
+                ondrop="drop(event)">
+                <td onclick="toggleRows(this)">Data 3.1</td>
+                <td>Data 2.2</td>
+                <td>Data 2.3</td>
+                <td>Data 2.4</td>
+                <td>Data 2.5</td>
+                <td>Data 2.6</td>
+                <td>Data 2.7</td>
+                <td>Data 2.8</td>
+            </tr>
+            <tr class="main-data-row" draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)"
+                ondrop="drop(event)">
+                <td onclick="toggleRows(this)">Data 4.1</td>
+                <td>Data 2.2</td>
+                <td>Data 2.3</td>
+                <td>Data 2.4</td>
+                <td>Data 2.5</td>
+                <td>Data 2.6</td>
+                <td>Data 2.7</td>
+                <td>Data 2.8</td>
+            </tr>
         </tbody>
     </table>
-    <button onclick="createMainDataRow()">Add New Main Data Row</button>
+    <button onclick="createMainDataRow()" style="margin-left: 0px;">Add New Main Data Row</button>
 
 
 
@@ -327,12 +372,18 @@
 
             const addRowButton = document.createElement('button');
             addRowButton.textContent = 'Add New Row';
+            addRowButton.className = `add-row-button level-${level}`; // Add level class
             addRowButton.onclick = () => createSubRowsButtonClick(afterRow, level);
 
             addRowButtonCell.appendChild(addRowButton);
             addRowButtonRow.appendChild(addRowButtonCell);
             afterRow.insertAdjacentElement('afterend', addRowButtonRow);
         }
+
+        function createSubRowsButtonClick(row, level) {
+            createSubRows(row.querySelector('td:first-child'), level);
+        }
+
 
         function createSubRowsButtonClick(row, level) {
             createSubRows(row.querySelector('td:first-child'), level);
