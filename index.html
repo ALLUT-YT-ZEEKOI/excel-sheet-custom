@@ -88,6 +88,22 @@
             padding-left: 120px;
         }
 
+
+
+        .sub-row.level-4 td:first-child {
+            padding-left: 150px;
+        }
+
+        .sub-row.level-5 td:first-child {
+            padding-left: 180px;
+        }
+
+        .sub-row.level-6 td:first-child {
+            padding-left: 210px;
+        }
+
+
+
         .main-data-row {
             background-color: #f9f9f9;
             cursor: move;
@@ -134,6 +150,20 @@
         .add-row-button.level-3 {
             margin-left: 120px;
             /* Padding for sub-row level 3 */
+        }
+
+        .small-btn {
+            padding: 2px 5px;
+            font-size: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .small-btn:hover {
+            background-color: #0056b3;
         }
     </style>
 
@@ -306,7 +336,7 @@
         });
 
 
-        const maxLevel = 4;
+        const maxLevel = 8;
 
         function toggleRows(cell) {
             const currentRow = cell.parentElement;
@@ -405,7 +435,6 @@
             if (level >= maxLevel) return;
 
             const currentRow = cell.parentElement;
-
             const newRow = document.createElement('tr');
             newRow.className = `sub-row level-${level}`;
 
@@ -414,6 +443,15 @@
                 newCell.textContent = `Sub-row ${level}.${i + 1}`;
                 if (i === 0) {
                     newCell.onclick = () => toggleSubRows(newCell, level + 1);
+                    // Create and add the small button
+                    const smallButton = document.createElement('button');
+                    smallButton.textContent = '+';
+                    smallButton.className = 'small-btn';
+                    smallButton.onclick = (event) => {
+                        event.stopPropagation();
+                        createSubRows(newCell, level + 1);
+                    };
+                    newCell.appendChild(smallButton);
                 }
                 newRow.appendChild(newCell);
             }
@@ -421,6 +459,12 @@
             currentRow.insertAdjacentElement('afterend', newRow);
             addOrReplaceButton(newRow, level);
         }
+
+        smallButton.onclick = (event) => {
+            event.stopPropagation();
+            createSubRows(newCell, level + 1);
+        };
+
 
         function addOrReplaceButton(afterRow, level) {
             // Check if a button already exists at this level
