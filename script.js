@@ -228,7 +228,7 @@ function createnormalrow_2(event) {
 
     // Create new normal rows
     const normalRows = [];
-    for (let i = 1; i <= 2; i++) {
+    for (let i = 1; i <= 1; i++) {
         const normalRow = document.createElement('tr');
         normalRow.className = 'normal-row';
         for (let j = 0; j < 8; j++) {
