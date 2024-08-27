@@ -185,12 +185,12 @@ button:hover {
     overflow: hidden;
     text-overflow: ellipsis;
     /* width: 150px; */
-
-    font-family: 'Poppins';
+    font-size: 14px;
+    font-family: sans-serif;
     color: '#1E1E1E';
-    font-size: 13.82;
-    font-family: 'Poppins';
-    font-weight: 500;
+
+
+    font-weight: 600;
 }
 
 
