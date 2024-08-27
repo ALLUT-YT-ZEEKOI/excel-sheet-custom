@@ -1,0 +1,232 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+table {
+    width: 50%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* Ensure column width is fixed */
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    /* padding: 8px; */
+    text-align: left;
+    position: relative;
+    white-space: nowrap;
+    /* Prevent text wrapping */
+    overflow: hidden;
+    /* Hide overflow text */
+    text-overflow: ellipsis;
+    /* Show ellipsis for overflow text */
+    width: 150px;
+
+
+
+
+    color: '#1E1E1E';
+    font-size: 13.82;
+    font-family: 'Poppins';
+    font-weight: '500';
+
+}
+
+th {
+    background-color: #f2f2f2;
+    position: relative;
+}
+
+.resizer {
+    width: 5px;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: col-resize;
+    user-select: none;
+    background-color: transparent;
+}
+
+.resizer:hover {
+    background-color: #ddd;
+}
+
+button {
+    /* margin-top: 10px; */
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 25px;
+}
+
+
+button:hover {
+    background-color: #45a049;
+}
+
+.normal-row td:first-child,
+.sub-row td:first-child {
+    padding-left: 30px;
+}
+
+.sub-row.level-1 td:first-child {
+    padding-left: 60px;
+}
+
+.sub-row.level-2 td:first-child {
+    padding-left: 90px;
+}
+
+.sub-row.level-3 td:first-child {
+    padding-left: 120px;
+}
+
+
+
+.sub-row.level-4 td:first-child {
+    padding-left: 150px;
+}
+
+.sub-row.level-5 td:first-child {
+    padding-left: 180px;
+}
+
+.sub-row.level-6 td:first-child {
+    padding-left: 210px;
+}
+
+
+
+.main-data-row {
+    background-color: #f9f9f9;
+    cursor: move;
+}
+
+.hidden {
+    display: none;
+}
+
+.dragging {
+    opacity: 0.5;
+}
+
+.drop-indicator {
+    border: 2px solid #4CAF50;
+    border-style: dashed;
+    background-color: rgba(76, 175, 80, 0.1);
+    /* Light green background */
+    height: 0;
+    /* No height to keep it as a line */
+    position: relative;
+}
+
+.drop-target {
+    border: 2px dashed #4CAF50;
+}
+
+/* lslslsllslsl */
+.add-row-button {
+    margin-left: 30px;
+    /* Default padding for normal rows */
+}
+
+.add-row-button.level-1 {
+    margin-left: 60px;
+    /* Padding for sub-row level 1 */
+}
+
+.add-row-button.level-2 {
+    margin-left: 90px;
+    /* Padding for sub-row level 2 */
+}
+
+.add-row-button.level-3 {
+    margin-left: 120px;
+    /* Padding for sub-row level 3 */
+}
+
+.small-btn {
+    padding: 2px 5px;
+    font-size: 12px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.small-btn:hover {
+    background-color: #0056b3;
+}
+
+.table-head {
+    color: #6B6B6B;
+    font-size: 15.1px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+
+.data1-1 {
+    padding-left: 8px;
+    border-top: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-left: 1px solid #dddddd00;
+    /* padding: 8px; */
+    text-align: left;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* width: 150px; */
+
+    font-family: 'Poppins';
+    color: '#1E1E1E';
+    font-size: 13.82;
+    font-family: 'Poppins';
+    font-weight: 500;
+}
+
+
+table {
+    width: 50%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* Ensure column width is fixed */
+}
+
+th,
+td {
+    padding-left: 8px;
+    border: 1px solid #ddd;
+    /* padding: 8px; */
+    text-align: left;
+    position: relative;
+    white-space: nowrap;
+    /* Prevent text wrapping */
+    overflow: hidden;
+    /* Hide overflow text */
+    text-overflow: ellipsis;
+    /* Show ellipsis for overflow text */
+    width: 300px;
+
+
+
+
+    color: '#1E1E1E';
+    font-size: 13.82;
+    font-family: 'Poppins';
+    font-weight: '500';
+
+}
+
+th {
+    background-color: #f2f2f2;
+    position: relative;
+}
