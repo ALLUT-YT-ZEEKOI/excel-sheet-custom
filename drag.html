@@ -1,270 +1,231 @@
-correct working code of excel sheet with out drag and resizer
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Table</title>
+    <title>Dynamic Table with Resizable Columns</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         th,
         td {
+            padding-left: 8px;
             border: 1px solid #ddd;
-            padding: 8px;
             text-align: left;
+            position: relative;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 150px;
+            min-width: 300px;
+            color: #1E1E1E;
+            font-size: 13.82px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
         }
 
         th {
             background-color: #f2f2f2;
+            position: relative;
         }
 
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        .resizer {
+            width: 5px;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            cursor: col-resize;
+            user-select: none;
+            background-color: transparent;
+        }
+
+        .resizer:hover {
+            background-color: #ddd;
+        }
+
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            padding: 10px;
+            z-index: 1;
+        }
+
+        .context-menu ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .context-menu li {
+            padding: 5px 0;
             cursor: pointer;
         }
 
-        button:hover {
-            background-color: #45a049;
+        .context-menu li:hover {
+            background-color: #e6e6e6;
         }
 
-        .normal-row td:first-child,
-        .sub-row td:first-child {
-            padding-left: 30px;
-        }
-
-        .sub-row.level-1 td:first-child {
-            padding-left: 60px;
-        }
-
-        .sub-row.level-2 td:first-child {
-            padding-left: 90px;
-        }
-
-        .sub-row.level-3 td:first-child {
-            padding-left: 120px;
-        }
-
-        .main-data-row {
-            background-color: #f9f9f9;
-        }
-
-        .hidden {
-            display: none;
+        .frozen {
+            position: sticky;
+            left: 0;
+            background-color: #f2f2f2;
+            /* Optional: background color for frozen column */
+            z-index: 10;
+            /* Ensure it stays above other content */
         }
     </style>
 </head>
 
 <body>
-    <table id="myTable">
-        <thead>
-            <tr>
-                <th>Column 1</th>
-                <th>Column 2</th>
-                <th>Column 3</th>
-                <th>Column 4</th>
-                <th>Column 5</th>
-                <th>Column 6</th>
-                <th>Column 7</th>
-                <th>Column 8</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="main-data-row">
-                <td onclick="toggleRows(this)">Data 1.1</td>
-                <td>Data 1.2</td>
-                <td>Data 1.3</td>
-                <td>Data 1.4</td>
-                <td>Data 1.5</td>
-                <td>Data 1.6</td>
-                <td>Data 1.7</td>
-                <td>Data 1.8</td>
-            </tr>
-            <tr class="main-data-row">
-                <td onclick="toggleRows(this)">Data 2.1</td>
-                <td>Data 2.2</td>
-                <td>Data 2.3</td>
-                <td>Data 2.4</td>
-                <td>Data 2.5</td>
-                <td>Data 2.6</td>
-                <td>Data 2.7</td>
-                <td>Data 2.8</td>
-            </tr>
-        </tbody>
-    </table>
-    <button onclick="createMainDataRow()">Add New Main Data Row</button>
+    <div style="display: flex; justify-content: center;">
+        <div style="width: 86%; overflow-y: auto;">
+            <table id="myTable" border="1">
+                <thead>
+                    <tr>
+                        <th>
+                            <span class="table-head">Product</span>
+                            <div class="resizer"></div>
+                        </th>
+                        <th>
+                            <span class="table-head">Qty</span>
+                            <div class="resizer"></div>
+                        </th>
+                        <th>
+                            <span class="table-head">Remarks</span>
+                            <div class="resizer"></div>
+                        </th>
+                        <th>
+                            <span class="table-head">Unit Price</span>
+                            <div class="resizer"></div>
+                        </th>
+                        <th>
+                            <span class="table-head">Discount</span>
+                            <div class="resizer"></div>
+                        </th>
+                        <th>
+                            <span class="table-head">Tax</span>
+                            <div class="resizer"></div>
+                        </th>
+                        <th>
+                            <span class="table-head">Price inc.tax</span>
+                            <div class="resizer"></div>
+                        </th>
+                        <th>
+                            <span class="table-head">Subtotal</span>
+                            <div class="resizer"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="main-data-row" draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)"
+                        ondrop="drop(event)">
+                        <td onclick="toggleRows(this)" class="data1-1">
+                            Data 1.1
+                            <button onclick="createnormalrow_2(event)" class="data-1-1_btn"><i
+                                    class="bi bi-plus-lg"></i></button>
+                        </td>
+                        <td>Lorem ipsum dolor sit amet consectetur adipisicing elit.</td>
+                        <td>Data 1.3</td>
+                        <td>Data 1.4</td>
+                        <td>Data 1.5</td>
+                        <td>Data 1.6</td>
+                        <td>Data 1.7</td>
+                        <td>Data 1.8</td>
+                    </tr>
+                    <tr class="main-data-row" draggable="true" ondragstart="drag(event)" ondragover="allowDrop(event)"
+                        ondrop="drop(event)">
+                        <td onclick="toggleRows(this)" class="data1-1">Data 2.1</td>
+                        <td>Data 2.2</td>
+                        <td>Data 2.3</td>
+                        <td>Data 2.4</td>
+                        <td>Data 2.5</td>
+                        <td>Data 2.6</td>
+                        <td>Data 2.7</td>
+                        <td>Data 2.8</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="context-menu" id="contextMenu">
+        <ul>
+            <li onclick="freezeColumn()">Freeze Column</li>
+        </ul>
+    </div>
+
     <script>
-        const maxLevel = 3;
+        document.querySelectorAll('.resizer').forEach(resizer => {
+            resizer.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
 
-        function toggleRows(cell) {
-            const currentRow = cell.parentElement;
-            const nextRows = [];
+                const th = resizer.parentElement;
+                const startOffset = th.offsetWidth - e.pageX;
 
-            // Collect rows to toggle
-            let nextSibling = currentRow.nextElementSibling;
-            while (nextSibling && !nextSibling.classList.contains('main-data-row')) {
-                nextRows.push(nextSibling);
-                nextSibling = nextSibling.nextElementSibling;
-            }
-
-            // Toggle visibility
-            if (nextRows.length > 0) {
-                if (nextRows[0].classList.contains('hidden')) {
-                    nextRows.forEach(row => row.classList.remove('hidden'));
-                } else {
-                    nextRows.forEach(row => row.classList.add('hidden'));
-                }
-            } else {
-                if (cell.classList.contains('processed')) return;
-
-                cell.classList.add('processed');
-                const tableBody = document.querySelector('#myTable tbody');
-
-                const normalRows = [];
-                for (let rowIndex = 1; rowIndex <= 2; rowIndex++) {
-                    const normalRow = document.createElement('tr');
-                    normalRow.className = 'normal-row';
-                    for (let i = 0; i < 8; i++) {
-                        const newCell = document.createElement('td');
-                        newCell.textContent = `Normal Row ${rowIndex} - ${i + 1}`;
-                        if (i === 0) {
-                            newCell.onclick = () => toggleSubRows(newCell, 1);
-                        }
-                        normalRow.appendChild(newCell);
-                    }
-                    normalRows.push(normalRow);
+                function onMouseMove(e) {
+                    th.style.width = startOffset + e.pageX + 'px';
                 }
 
-                currentRow.insertAdjacentElement('afterend', normalRows[1]);
-                currentRow.insertAdjacentElement('afterend', normalRows[0]);
-
-                const addRowButtonRow = document.createElement('tr');
-                const addRowButtonCell = document.createElement('td');
-                addRowButtonCell.colSpan = 8;
-
-                const addRowButton = document.createElement('button');
-                addRowButton.textContent = 'Add New Row';
-                addRowButton.onclick = () => createNormalRow3(normalRows[1]);
-
-                addRowButtonCell.appendChild(addRowButton);
-                addRowButtonRow.appendChild(addRowButtonCell);
-                normalRows[1].insertAdjacentElement('afterend', addRowButtonRow);
-            }
-        }
-
-        function createNormalRow3(afterRow) {
-            const normalRow3 = document.createElement('tr');
-            normalRow3.className = 'normal-row';
-
-            for (let i = 0; i < 8; i++) {
-                const newCell = document.createElement('td');
-                newCell.textContent = `Normal Row 3 - ${i + 1}`;
-                normalRow3.appendChild(newCell);
-            }
-
-            afterRow.insertAdjacentElement('afterend', normalRow3);
-        }
-
-        function toggleSubRows(cell, level) {
-            const currentRow = cell.parentElement;
-            const nextRows = [];
-
-            let nextSibling = currentRow.nextElementSibling;
-            while (nextSibling && nextSibling.classList.contains('sub-row')) {
-                nextRows.push(nextSibling);
-                nextSibling = nextSibling.nextElementSibling;
-            }
-
-            if (nextRows.length > 0) {
-                if (nextRows[0].classList.contains('hidden')) {
-                    nextRows.forEach(row => row.classList.remove('hidden'));
-                } else {
-                    nextRows.forEach(row => row.classList.add('hidden'));
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
                 }
-            } else {
-                if (cell.classList.contains('sub-row-processed')) return;
+            });
+        });
 
-                cell.classList.add('sub-row-processed');
-                createSubRows(cell, level);
+        document.querySelectorAll('th').forEach((th) => {
+            th.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const contextMenu = document.getElementById('contextMenu');
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+                contextMenu.dataset.columnIndex = Array.from(th.parentNode.children).indexOf(th);
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            const contextMenu = document.getElementById('contextMenu');
+            if (e.target !== contextMenu && !contextMenu.contains(e.target)) {
+                contextMenu.style.display = 'none';
             }
-        }
+        });
 
-        function createSubRows(cell, level) {
-            if (level >= maxLevel) return;
+        function freezeColumn() {
+            const contextMenu = document.getElementById('contextMenu');
+            const columnIndex = contextMenu.dataset.columnIndex;
+            const table = document.getElementById('myTable');
 
-            const currentRow = cell.parentElement;
+            // Freeze all columns from the start to the selected column
+            for (let i = 0; i <= columnIndex; i++) {
+                const th = table.getElementsByTagName('th')[i];
+                th.classList.add('frozen');
+                th.style.position = 'sticky';
+                th.style.left = `${i * 150}px`; // Adjust left position based on column width
+                th.style.zIndex = '10';
 
-            const newRow = document.createElement('tr');
-            newRow.className = `sub-row level-${level}`;
-
-            for (let i = 0; i < 8; i++) {
-                const newCell = document.createElement('td');
-                newCell.textContent = `Sub-row ${level}.${i + 1}`;
-                if (i === 0) {
-                    newCell.onclick = () => toggleSubRows(newCell, level + 1);
-                }
-                newRow.appendChild(newCell);
-            }
-
-            currentRow.insertAdjacentElement('afterend', newRow);
-            addOrReplaceButton(newRow, level);
-        }
-
-        function addOrReplaceButton(afterRow, level) {
-            const existingButtonRow = afterRow.nextElementSibling;
-
-            if (existingButtonRow && existingButtonRow.querySelector('button')) {
-                existingButtonRow.remove();
-            }
-
-            const addRowButtonRow = document.createElement('tr');
-            const addRowButtonCell = document.createElement('td');
-            addRowButtonCell.colSpan = 8;
-
-            const addRowButton = document.createElement('button');
-            addRowButton.textContent = 'Add New Row';
-            addRowButton.onclick = () => createSubRowsButtonClick(afterRow, level);
-
-            addRowButtonCell.appendChild(addRowButton);
-            addRowButtonRow.appendChild(addRowButtonCell);
-            afterRow.insertAdjacentElement('afterend', addRowButtonRow);
-        }
-
-        function createSubRowsButtonClick(row, level) {
-            createSubRows(row.querySelector('td:first-child'), level);
-        }
-
-        function createMainDataRow() {
-            const tableBody = document.querySelector('#myTable tbody');
-            const newMainDataRow = document.createElement('tr');
-            newMainDataRow.className = 'main-data-row';
-
-            for (let i = 0; i < 8; i++) {
-                const newCell = document.createElement('td');
-                newCell.textContent = `New Data ${i + 1}`;
-                if (i === 0) {
-                    newCell.onclick = () => toggleRows(newCell);
-                }
-                newMainDataRow.appendChild(newCell);
+                // Apply sticky position to all td elements in the column
+                Array.from(table.querySelectorAll(`tr td:nth-child(${i + 1})`)).forEach(td => {
+                    td.classList.add('frozen');
+                    td.style.position = 'sticky';
+                    td.style.left = `${i * 150}px`; // Adjust left position based on column width
+                    td.style.zIndex = '1';
+                });
             }
 
-            tableBody.appendChild(newMainDataRow);
+            // Hide the context menu after selection
+            contextMenu.style.display = 'none';
         }
     </script>
 </body>
